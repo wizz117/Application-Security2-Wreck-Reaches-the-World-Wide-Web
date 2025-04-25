@@ -1,0 +1,3 @@
+/use.html
+card_supplied=True
+card_fname=txt; touch pwned;

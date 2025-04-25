@@ -1,0 +1,1 @@
+/buy.html?director=%3Cscript%3Ealert(%22hello%22)%3C/script%3E

