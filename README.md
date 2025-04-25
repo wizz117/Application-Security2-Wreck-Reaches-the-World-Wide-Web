@@ -1,5 +1,42 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/bE7tKiQg)
-# Homework 2: When a Wreck Reaches the World Wide Web
+This repository contains my completed solution for Homework 2 of NYU’s Application Security course. In this assignment, I audited a vulnerable Django-based gift card site built by "Shoddycorp's Cut-Rate Contracting", identified and exploited critical web vulnerabilities, and implemented secure remediations including encrypted database storage.
+
+---
+
+## ✅ Part 0: Environment Setup
+
+- Cloned the repository using GitHub Classroom.
+- Installed all dependencies including Django.
+- Configured database via:
+  ```bash
+  python3 manage.py makemigrations LegacySite
+  python3 manage.py migrate
+  python3 manage.py shell -c 'import import_dbs'
+- Setup GitHub Actions with a test workflow (.github/workflows/main.yml).
+- All commits signed using GPG ✍️
+
+## ✅ Part 1: Vulnerability Discovery and Remediation
+🚨 Discovered Attacks
+- xss.txt: A crafted URL that triggers a JavaScript alert("hello") on the client.
+- xsrf.html: A malicious HTML page that exploits a CSRF vulnerability to gift a card to test2 user without user consent.
+- sqli.gftcrd: Crafted input exploiting SQL injection to retrieve the admin password hash.
+- cmdi.txt and cmdi.gftcrd: Exploit a command injection vulnerability, executing touch pwned on the server.
+
+🔧 Fixes and Regression Testing
+- All vulnerabilities fixed using Django's built-in security mechanisms and custom validations.
+- Validated fixes with Django’s test client in LegacySite/tests.py.
+- GitHub Actions CI runs test suite to catch regressions.
+- Documented each bug and remediation approach in [`bugs.txt`](./bugs.txt).
+
+## ✅ Part 2: Database Encryption
+🔒 Implementation Highlights
+- Encrypted the Card.data field using the djfernet library.
+- Removed hardcoded SECRET_KEY and configured GitHub repository secrets instead.
+- Used .env file locally for development secrets (not committed).
+- Modified the Django settings to use os.environ["SECRET_KEY"].
+- Adjusted business logic for decrypted card comparison.
+- Full implementation explained in [`encryption_explanation.txt`](./encryption_explanation.txt).
+  
+#Assesment Quetion: Homework 2: When a Wreck Reaches the World Wide Web
 
 ## Get Latest Updates
 Use the following commands to pull the latest updates.
