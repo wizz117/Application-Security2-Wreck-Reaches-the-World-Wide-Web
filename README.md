@@ -35,8 +35,9 @@ This repository contains my completed solution for Homework 2 of NYU’s Applica
 - Modified the Django settings to use os.environ["SECRET_KEY"].
 - Adjusted business logic for decrypted card comparison.
 - Full implementation explained in [`encryption_explanation.txt`](./encryption_explanation.txt).
-  
-#Assesment Quetion: Homework 2: When a Wreck Reaches the World Wide Web
+
+---
+## Assesment Quetion: Homework 2: When a Wreck Reaches the World Wide Web
 
 ## Get Latest Updates
 Use the following commands to pull the latest updates.
