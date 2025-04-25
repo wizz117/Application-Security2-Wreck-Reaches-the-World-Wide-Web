@@ -1,0 +1,25 @@
+1) xss
+Vulnerability: Reflected XSS in item-single.html and gift.html
+Description: The director parameter in the item-single.html and gift.html pages is vulnerable to reflected Cross-Site Scripting (XSS). The field is marked as "safe" in the Django template, which disables automatic HTML escaping and considers user input as trusted. This allows an attacker to inject and execute malicious JavaScript in the victim's browser if the victim visits a crafted URL with the attack vector in the director parameter.
+Exploit: A crafted URL, such as /buy.html?director=%3Cscript%3Ealert(%22hello%22)%3C/script%3E , will execute JavaScript and display an alert with the message "hello" in the victim's browser if they are logged in and visit the link. This exploit relies on reflective XSS by passing the malicious payload in the director parameter.
+Remediation: The safe flag should be removed from the director field in item-single.html and gift.html, allowing Django to perform its default HTML escaping. Explicitly Escape Input: In buy_card_view() and gift_card_view() functions of LegacySite/views.py, the director input should be explicitly escaped using html.escape() to ensure untrusted user input is not processed as HTML.
+
+2)CSRF
+Vulnerability: Cross-Site Request Forgery (CSRF) in gift_card_view()
+Description: The gift_card_view() function in LegacySite/views.py incorrectly processes a GET request to update data, allowing CSRF exploitation. Since this update action lacks CSRF protection, an attacker can craft a page that, when visited by an authenticated user, sends an unauthorized GET request to issue a gift card to a specified recipient without the victim's consent.
+Exploit: The HTML file xsrf.html contains a crafted GET request. If an authenticated user visits this page, it triggers a GET request to issue a gift card of $999 to another user without their knowledge, due to the lack of CSRF protection and improper use of GET for modifying data.
+Remediation: Use POST for Data Modification: Update the gift_card_view() function to only process data-modifying actions through POST requests. Remove any logic that allows GET requests to alter data. Implement CSRF Token: Ensure that the /gift/0 form in gift.html includes a CSRF token and that it is validated in gift_card_view(). Add an else condition to handle bad requests gracefully, returning an error if the CSRF token is missing or invalid.
+
+
+3)SQL Injection 
+Vulnerability: SQL Injection in use_card_view() Function
+Description: The use_card_view() function in LegacySite/views.py is vulnerable to SQL injection due to unparameterized SQL queries involving user input. The signature field in the uploaded gift card file is directly embedded into a raw SQL query, allowing attackers to manipulate the query and access sensitive data.
+Exploit: The crafted sqli.giftcrd file contains a signature field with a SQL injection payload that appends a union query to retrieve the hash of the admin's password. When uploaded, this payload manipulates the SQL query to leak sensitive data.
+Remediation: Use parameterized queries to sanitize user inputs. For example, use placeholders in the SQL query ([signature]) instead of directly embedding the input. This prevents user input from altering the structure of the SQL command and ensures the input is treated as data rather than executable SQL.
+
+
+4)Command Injection 
+Vulnerability: Command Injection in use_card_view() via Unsafe os.system Execution
+Description: A command injection vulnerability exists in the parse_card_data() function of LegacySite/extras.py due to the unsafe use of os.system to process files with user-provided names. This allows an attacker to execute arbitrary shell commands by manipulating the card_fname field, posing a significant security risk.
+Exploit: A crafted POST request with card_fname containing a command injection payload can execute arbitrary shell commands on the server. For instance, setting card_fname to "hello; echo test" can cause the server to execute the echo test command.
+Remediation: Input Sanitization: Ensure the card_fname field is sanitized to accept only alphanumeric characters. This removes any characters that could be used in shell commands. Safe Command Execution: Replace os.system with subprocess.run() to manage commands securely. Avoid passing user input directly into commands and validate all inputs to prevent command injection.

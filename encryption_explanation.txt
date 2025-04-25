@@ -1,0 +1,40 @@
+1)Encryption Implementation
+To secure sensitive data in our database, particularly the card.data field, I implemented encryption using the djfernet library, which is compatible with Django. 
+The card.data field in models.py was updated to an EncryptedBinaryField. This change automatically encrypts data before storing it and decrypts it upon retrieval, thanks to djfernet’s seamless integration with Django ORM operations.
+After modifying the model, I purged the existing database, migrated a new one, and populated it with fresh data. I confirmed that the card.data field is now encrypted by purchasing gift cards and verifying that card.data is stored as an encrypted, base64-encoded blob.
+
+
+
+2)Handling Encrypted Data
+With the card.data field encrypted, certain processes in views.py needed adjustments for proper handling:
+The Card.objects.all() method is used to retrieve card data for purchasing and using gift cards. djfernet handles the decryption transparently, so data is automatically decrypted when retrieved from the database.
+Since encrypted data is returned as bytes, I decode it to a UTF-8 string and then load it as JSON to access fields such as signature. Once the signature is verified, I retrieve the card by card.id and update its status (e.g., marking it as used).
+
+
+
+
+3)Secret Key Management for Encryption
+Proper management of the encryption key is crucial to ensure data security. The following threat model outlines our approach to securing the encryption key and protecting against unauthorized data access:
+An attacker gains access to the database and attempts to retrieve the encryption key. If the attacker obtains the encryption key, they can decrypt all sensitive data, nullifying the encryption’s security benefits.
+Key Management:
+Store Key in a .py File: Simple to implement but vulnerable to exposure if combined with RCE or directory traversal vulnerabilities.
+Store Key in Environment Variables: Easy to implement and securely isolated in the runtime environment but requires trusted setup and initialization to ensure the variable is correctly set.
+I stored key in an environment variable (DB_SECRET_KEY) for its balance of security and practicality. This approach minimizes exposure by isolating the key in the environment, accessible only during runtime. The key is accessed in settings.py using os.environ.get("DB_SECRET_KEY"), ensuring it’s kept separate from the codebase and database.
+
+
+
+4)Testing Encryption Capabilities with GitHub Actions
+To validate encryption functionality, the tests.py file includes automated test cases. These tests cover vulnerabilities, data handling, and usage flows, ensuring encryption is properly integrated and functional. Key tests are:
+1.XSS Protection (test_xss_protection):
+Confirms that the director field is escaped properly, preventing reflected XSS attacks.
+2.XSRF Protection (test_xsrf):
+Tests that POST requests without CSRF tokens are blocked, ensuring XSRF defense.
+3.SQL Injection Prevention (test_sqli):
+Checks for SQL Injection vulnerabilities by attempting to exploit the card.data field retrieval.
+4.Command Injection Prevention (test_cmdi):
+Verifies that malicious file names do not lead to command execution, testing against potential command injection vulnerabilities.
+5.Buy and Use Card Flow (test_buy_and_use):
+This test, specifically for encryption verification, checks the “buy” and “use” functionalities with encrypted card.data. It performs the following:
+Buys a card and verifies it’s properly stored.
+Attempts to use the card by uploading it, confirming decryption and correct data handling.
+Ensures the card status is updated to "used" after processing.
